@@ -1,0 +1,41 @@
+profiles:
+  - node-static-nginx
+owner:
+  group: STRIDE_TMS_INTL
+notify:
+  slack:
+    channelName: "budget-allocation-ui"
+build:
+  docker:
+    app:
+      buildArgs:
+        buildDir: "build"
+  #skip: true
+  #version: "0.0.11"
+deploy:
+  releaseType:
+    rollbackOnError: false
+    waitForReady: true
+    deployTimeout: 1500
+  namespace: "budget-allocation"
+  gslb:
+    lbRoutings:
+      dev:
+        cnames: [flow.walmart.com]
+  helm:
+    values:
+      min:
+        cpu: 50m
+        memory: 50Mi
+      max:
+        cpu: 100m
+        memory: 100Mi
+  stages:
+    - name: dev
+      refs: [main, branch]
+      target:
+        - cluster_id: [scus-dev-a4]
+#  postDeploy:
+#    - task:
+#        name: messageSlack
+#        text: "App deployed to https://{{$.kitt.deploy.gslb.clusterProfiles.lab.targetHosts[0].appEndpoint}}"
